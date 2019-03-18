@@ -24,7 +24,7 @@ class PageVC: UIPageViewController {
         dataSource = self
         
         var newLocation = WeatherLocation()
-        newLocation.name = "Unknown Weather Location"
+        newLocation.name = ""
         locationsArray.append(newLocation)
         
         setViewControllers([createDetailVC(forPage: 0)], direction: .forward, animated: false, completion: nil)
@@ -70,6 +70,8 @@ class PageVC: UIPageViewController {
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        guard let currentViewController = self.viewControllers?[0] as? DetailVC else {return}
+        locationsArray = currentViewController.locationsArray
         if segue.identifier == "ToListVC" {
             let destination = segue.destination as! ListVC
             destination.locationsArray = locationsArray
