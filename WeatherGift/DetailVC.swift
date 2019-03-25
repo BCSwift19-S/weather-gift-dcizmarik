@@ -39,11 +39,24 @@ class DetailVC: UIViewController {
     }
     
     func updateUserInterface() {
-        locationLabel.text = locationsArray[currentPage].name
-        dateLabel.text = locationsArray[currentPage].coordinates
-        temperatureLabel.text = locationsArray[currentPage].currentTemp
-        currentImage.image = UIImage(named: locationsArray[currentPage].currentIcon)
+        let location = locationsArray[currentPage]
+        let dateString = formatTimeForTimeZone(unixDate: location.currentTime, timeZone: location.timeZone)
+        
+        locationLabel.text = location.name
+        dateLabel.text = dateString
+        temperatureLabel.text = location.currentTemp
+        currentImage.image = UIImage(named: location.currentIcon)
     }
+    
+    func formatTimeForTimeZone(unixDate: TimeInterval, timeZone:String) -> String {
+        let useableDate = Date(timeIntervalSince1970: unixDate)
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "EEEE, MMM dd, y"
+        dateFormatter.timeZone = TimeZone(identifier: timeZone)
+        let dateString = dateFormatter.string(from: useableDate)
+        return dateString
+    }
+    
     
 }
 
@@ -79,7 +92,6 @@ extension DetailVC: CLLocationManagerDelegate {
         let currentLatitude = currentLocation.coordinate.latitude
         let currentLongitude = currentLocation.coordinate.longitude
         let currentCoordinates = "\(currentLatitude),\(currentLongitude)"
-        dateLabel.text = currentCoordinates
         
         geoCoder.reverseGeocodeLocation(currentLocation, completionHandler:
             {placemarks, error in
