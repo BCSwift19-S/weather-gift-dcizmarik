@@ -9,6 +9,12 @@
 import UIKit
 import CoreLocation
 
+private let dateFormatter: DateFormatter = {
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "EEEE, MMM dd, y"
+    return dateFormatter
+}()
+
 class DetailVC: UIViewController {
 
     @IBOutlet weak var dateLabel: UILabel!
@@ -17,7 +23,8 @@ class DetailVC: UIViewController {
     @IBOutlet weak var summaryLabel: UILabel!
     @IBOutlet weak var currentImage: UIImageView!
     @IBOutlet weak var tableView: UITableView!
-    
+    @IBOutlet weak var collectionView: UICollectionView!
+   
     var currentPage = 0
     var locationsArray = [WeatherLocation]()
     var locationManager: CLLocationManager!
@@ -27,6 +34,8 @@ class DetailVC: UIViewController {
         super.viewDidLoad()
         tableView.delegate = self
         tableView.dataSource = self
+        collectionView.delegate = self
+        collectionView.dataSource = self
         if currentPage != 0 {
             self.locationsArray[currentPage].getWeather {
                 self.updateUserInterface()
@@ -43,8 +52,8 @@ class DetailVC: UIViewController {
     
     func updateUserInterface() {
         let location = locationsArray[currentPage]
-        let dateString = formatTimeForTimeZone(unixDate: location.currentTime, timeZone: location.timeZone)
-        
+        //let dateString = formatTimeForTimeZone(unixDate: location.currentTime, timeZone: location.timeZone)
+        let dateString = location.currentTime.format(timeZone: location.timeZone, dateFormatter: dateFormatter)
         locationLabel.text = location.name
         dateLabel.text = dateString
         temperatureLabel.text = location.currentTemp
@@ -53,14 +62,14 @@ class DetailVC: UIViewController {
         
     }
     
-    func formatTimeForTimeZone(unixDate: TimeInterval, timeZone:String) -> String {
-        let useableDate = Date(timeIntervalSince1970: unixDate)
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "EEEE, MMM dd, y"
-        dateFormatter.timeZone = TimeZone(identifier: timeZone)
-        let dateString = dateFormatter.string(from: useableDate)
-        return dateString
-    }
+//    func formatTimeForTimeZone(unixDate: TimeInterval, timeZone:String) -> String {
+//        let useableDate = Date(timeIntervalSince1970: unixDate)
+//        //let dateFormatter = DateFormatter()
+//        //dateFormatter.dateFormat = "EEEE, MMM dd, y"
+//        dateFormatter.timeZone = TimeZone(identifier: timeZone)
+//        let dateString = dateFormatter.string(from: useableDate)
+//        return dateString
+//    }
     
     
 }
@@ -140,4 +149,15 @@ extension DetailVC: UITableViewDelegate, UITableViewDataSource {
         return 80
     }
     
+}
+
+extension DetailVC: UICollectionViewDataSource, UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return 24
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let hourlyCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HourlyCell", for: indexPath)
+        return hourlyCell
+    }
 }
